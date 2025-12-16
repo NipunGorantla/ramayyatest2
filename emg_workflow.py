@@ -39,6 +39,8 @@ except ImportError:  # pragma: no cover - optional
 CONFIG = {
     "data_path": "./data/emg_recording.xlsx",  # Path to the Excel file
     "output_dir": "./emg_outputs",  # Folder for plots/CSV
+    "data_path": "/Users/nipungorantla/Desktop/Oddball_DOC001/NGControlBalls.xlsx",  # Path to the Excel file
+    "output_dir": "./Users/nipungorantla/Desktop/Oddball_DOC001/emgOutputs",  # Folder for plots/CSV
     "fs": 2048.0,  # Sampling rate in Hz
     "time_column": "TIME",
     "channel_columns": ["EMGA", "EMGB", "EMGC", "EMGD"],
@@ -122,6 +124,12 @@ def load_excel(filepath: Path, time_column: str, channel_columns: List[str]) -> 
             if time_dt.isna().all():
                 raise ValueError("Unable to parse TIME column into seconds")
             time_sec = (time_dt - time_dt.iloc[0]).dt.total_seconds()
+    else:
+        # Robust conversion via pandas timedeltas
+        try:
+            time_sec = pd.to_timedelta(time_raw).dt.total_seconds()
+        except Exception:  # pragma: no cover - defensive
+            time_sec = pd.to_datetime(time_raw).astype("int64") / 1e9
 
     time_sec = time_sec - time_sec.iloc[0]
     data = df[channel_columns].to_numpy(dtype=float)
