@@ -1,1 +1,39 @@
-README
+# EMG DC-Preserving Workflow
+
+This repo provides a single runnable Python script (`emg_workflow.py`) that
+extracts DC/ultra-slow trends, movement envelopes, and canonical EMG bands
+from Excel EMG recordings without removing DC drift. It uses MNE for
+filtering/PSD/spectrograms and NeuroKit2 for EMG amplitude estimation. Optional
+change-point detection (ruptures) identifies a DC-driven transition to build
+baseline/transition/post segments.
+
+## Quickstart
+1. Create/activate a virtual environment and install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Place your Excel file at `./data/emg_recording.xlsx` or update `CONFIG["data_path"]`
+   in `emg_workflow.py`. Expected columns: `TIME, EMGA, EMGB, EMGC, EMGD`.
+3. Run the workflow:
+   ```bash
+   python emg_workflow.py
+   ```
+4. Outputs (plots, summary CSV, metadata) will be written to `./emg_outputs` by default.
+
+## Customization knobs
+Open `emg_workflow.py` and edit the `CONFIG` dictionary to change:
+- Input path, output folder, sampling rate
+- DC trend ladder cutoffs (<0.1 / <0.2 / <0.5 Hz by default)
+- Movement band (default 0.5–5 Hz), EMG band (default 20–250 Hz), envelope smoothing
+- Change-point detection toggle/penalty and transition window length
+- PSD and spectrogram windowing
+
+Bandpower definitions for the summary CSV are grouped in `BAND_DEFINITIONS` and
+can be adjusted if you want different EMG sub-bands.
+
+## Notes
+- TIME is converted from Excel time objects or datetimes to seconds starting at 0.
+- Raw data are preserved; all filters are applied to copies so DC drift remains available.
+- The summary CSV includes drift slope/range, cross-channel trend correlation,
+  PCA PC1 variance explained, residual trend spread, and EMG bandpowers for each
+  segment (baseline/transition/post).
