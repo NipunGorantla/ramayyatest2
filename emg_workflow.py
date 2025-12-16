@@ -36,8 +36,8 @@ except ImportError:  # pragma: no cover - optional
 # Customization knobs
 # -----------------------------------------------------------------------------
 CONFIG = {
-    "data_path": "./data/emg_recording.xlsx",  # Path to the Excel file
-    "output_dir": "./emg_outputs",  # Folder for plots/CSV
+    "data_path": "/Users/nipungorantla/Desktop/Oddball_DOC001/NGControlBalls.xlsx",  # Path to the Excel file
+    "output_dir": "./Users/nipungorantla/Desktop/Oddball_DOC001/emgOutputs",  # Folder for plots/CSV
     "fs": 2048.0,  # Sampling rate in Hz
     "time_column": "TIME",
     "channel_columns": ["EMGA", "EMGB", "EMGC", "EMGD"],
