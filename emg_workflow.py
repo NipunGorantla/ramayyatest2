@@ -14,6 +14,7 @@ Customization knobs live in the CONFIG dictionary near the top of the file.
 from __future__ import annotations
 
 import json
+import datetime as dt
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -36,6 +37,8 @@ except ImportError:  # pragma: no cover - optional
 # Customization knobs
 # -----------------------------------------------------------------------------
 CONFIG = {
+    "data_path": "./data/emg_recording.xlsx",  # Path to the Excel file
+    "output_dir": "./emg_outputs",  # Folder for plots/CSV
     "data_path": "/Users/nipungorantla/Desktop/Oddball_DOC001/NGControlBalls.xlsx",  # Path to the Excel file
     "output_dir": "./Users/nipungorantla/Desktop/Oddball_DOC001/emgOutputs",  # Folder for plots/CSV
     "fs": 2048.0,  # Sampling rate in Hz
@@ -103,6 +106,24 @@ def load_excel(filepath: Path, time_column: str, channel_columns: List[str]) -> 
     if np.issubdtype(time_raw.dtype, np.number):
         # Excel stores time as fraction of day; convert to seconds
         time_sec = time_raw.astype(float) * 24 * 3600
+    elif pd.api.types.is_timedelta64_dtype(time_raw):
+        time_sec = time_raw.dt.total_seconds()
+    elif pd.api.types.is_datetime64_any_dtype(time_raw):
+        time_sec = (pd.to_datetime(time_raw) - pd.to_datetime(time_raw.iloc[0])).dt.total_seconds()
+    elif isinstance(time_raw.iloc[0], dt.time):
+        # Excel time objects or Python datetime.time values
+        time_sec = time_raw.apply(
+            lambda t: t.hour * 3600 + t.minute * 60 + t.second + t.microsecond / 1e6
+        )
+    else:
+        # Fallback to timedelta parsing; final guard with datetime conversion
+        try:
+            time_sec = pd.to_timedelta(time_raw).dt.total_seconds()
+        except Exception:  # pragma: no cover - defensive
+            time_dt = pd.to_datetime(time_raw, errors="coerce")
+            if time_dt.isna().all():
+                raise ValueError("Unable to parse TIME column into seconds")
+            time_sec = (time_dt - time_dt.iloc[0]).dt.total_seconds()
     else:
         # Robust conversion via pandas timedeltas
         try:
