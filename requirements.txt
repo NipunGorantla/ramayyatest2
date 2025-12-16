@@ -1,0 +1,10 @@
+mne==1.6.1
+neurokit2==0.2.4
+pandas==2.1.4
+numpy==1.26.4
+matplotlib==3.8.3
+seaborn==0.13.2
+scipy==1.11.4
+openpyxl==3.1.2
+ruptures==1.1.9
+scikit-learn==1.4.2
